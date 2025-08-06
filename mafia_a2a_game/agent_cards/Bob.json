@@ -1,0 +1,24 @@
+{
+  "name": "Bob Agent",
+  "description": "Member2",
+  "host": "localhost",
+  "port": 20002,
+  "version": "1.0.0",
+  "defaultInputModes": ["text"],
+  "defaultOutputModes": ["text"],
+
+  "skills": [
+    {
+      "id": "member2",
+      "name": "Bob",
+      "description": "Member of Game",
+      "tags": ["member"],
+      "examples": [""]
+    }
+  ],
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false
+  }
+}
+  

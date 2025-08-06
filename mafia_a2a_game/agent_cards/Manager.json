@@ -1,0 +1,22 @@
+{
+    "name": "Manager Agent",
+    "description": "Manager",
+    "host": "localhost",
+    "port": 20000,
+    "version": "1.0.0",
+    "defaultInputModes": ["text"],
+    "defaultOutputModes": ["text"],
+    "skills": [
+      {
+        "id": "recorder",
+        "name": "Recorder",
+        "description": "Stores input and summary into DB",
+        "tags": ["recorder", "storage"],
+        "examples": ["Store input:xxx and summary:yyy"]
+      }
+    ],
+    "capabilities": {
+      "streaming": true,
+      "pushNotifications": false
+    }  
+}

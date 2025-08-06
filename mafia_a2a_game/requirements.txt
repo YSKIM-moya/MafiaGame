@@ -1,0 +1,8 @@
+a2a-sdk
+dotenv
+uvicorn
+click
+httpx
+asyncio
+nest_asyncio
+pydantic
