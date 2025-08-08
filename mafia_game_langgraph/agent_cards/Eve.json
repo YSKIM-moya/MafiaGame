@@ -1,0 +1,23 @@
+{
+    "name": "Eve Agent",
+    "description": "Member4",
+    "host": "localhost",
+    "port": 20005,
+    "version": "1.0.0",
+    "defaultInputModes": ["text"],
+    "defaultOutputModes": ["text"],
+  
+    "skills": [
+      {
+        "id": "member5",
+        "name": "Eve",
+        "description": "Member of Game",
+        "tags": ["member"],
+        "examples": [""]
+      }
+    ],
+    "capabilities": {
+      "streaming": true,
+      "pushNotifications": false
+    }
+  }

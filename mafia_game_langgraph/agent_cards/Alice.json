@@ -1,0 +1,23 @@
+{
+    "name": "Alice Agent",
+    "description": "Member1",
+    "host": "localhost",
+    "port": 20001,
+    "version": "1.0.0",
+    "defaultInputModes": ["text"],
+    "defaultOutputModes": ["text"],
+
+    "skills": [
+      {
+        "id": "member1",
+        "name": "Alice",
+        "description": "Member of Game",
+        "tags": ["member"],
+        "examples": [""]
+      }
+    ],
+    "capabilities": {
+      "streaming": true,
+      "pushNotifications": false
+    }
+}

@@ -1,0 +1,24 @@
+{
+  "name": "Carol Agent",
+  "description": "Member3",
+  "host": "localhost",
+  "port": 20003,
+  "version": "1.0.0",
+  "defaultInputModes": ["text"],
+  "defaultOutputModes": ["text"],
+
+  "skills": [
+    {
+      "id": "member3",
+      "name": "Alice",
+      "description": "Member of Game",
+      "tags": ["member"],
+      "examples": [""]
+    }
+  ],
+  "capabilities": {
+    "streaming": true,
+    "pushNotifications": false
+  }
+}
+  
