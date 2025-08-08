@@ -214,7 +214,6 @@ class A2AClientAgent:
         message_id = str(uuid.uuid4())
 
         #print(f"Send Request : ", TextPart(text=user_text))
-        print(f"Send Request : ", user_text)
         request: MessageSendParams = MessageSendParams(
             id=str(uuid.uuid4()),
             message=Message(

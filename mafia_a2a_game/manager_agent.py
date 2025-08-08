@@ -16,7 +16,7 @@ from messages import Role
 from messages import (
     Role,
     MessageType,
-    create_role_assignment_message
+    create_message
     )
 from dataclasses import dataclass
 
@@ -31,15 +31,15 @@ logger = logging.getLogger(__name__)
 
 class ManagerAgent(BaseAgent):
     """Manager Agent."""
-
-    def __init__(self):
+    def __init__(self, agent_name: str, description: str):
         
         super().__init__(
-            agent_name='Manager Agent',
-            description='Facilitate inter agent communication',
+            agent_name=agent_name,
+            description=description,
             content_types=['text', 'text/plain'],
         )
-
+    
+        self.name = agent_name
         self.agent_info: Dict[str, AgentStatus] = {}
         self.executor: GenericAgentExecutor | None = None
 
@@ -144,29 +144,29 @@ class ManagerAgent(BaseAgent):
 
         for agent_name, status in self.agent_info.items():
             try:
-                message_dict = create_role_assignment_message(status.role)
-                # JSON 문자열로 직렬화 
-                message = json.dumps(message_dict)
+                message = create_message(MessageType.ROLE_ASSIGNMENT, self.name, agent_name, role=status.role)
 
                 await self.executor.send_to_other(agent_name, message)
                 print(f"✅ 역할 전송 완료: {agent_name} → {status.role.name}")
             except Exception as e:
                 print(f"⚠️ 역할 전송 실패: {agent_name} → {status.role.name} ({e})")    
-
  
 
     # 2. 자기 소개 
     async def request_introduction(self):
         """모든 에이전트에게 낮 시작 자기소개 요청 메시지를 보냅니다."""
         
-        message_dict = {
-            "type": MessageType.INTRO_REQUEST.name,  
-            "payload": {
-                "message": "🌞 첫째날 낮이 되었습니다. 모두 자기소개를 해주세요."
-            }
-        }
+        message = create_message(MessageType.INTRO_REQUEST, self.name, "All")
 
-        message = json.dumps(message_dict)
+        await self.broadcast_to_roles(message)
+        print("📢 게임 시작 메시지를 모든 에이전트에게 전송했습니다.")
+
+
+    # 3. 낮 행동 : 토론
+    async def execute_day_phase(self):
+        """모든 에이전트에게 낮 시작 요청 메시지를 보냅니다."""
+        
+        message = create_message(MessageType.DAY_ACTION_REQUEST, self.name, "All-Alive")
 
         await self.broadcast_to_roles(message)
         print("📢 낮 시작 메시지를 모든 에이전트에게 전송했습니다.")
@@ -181,15 +181,9 @@ class ManagerAgent(BaseAgent):
             self.agent_info[executed].alive = False
             print(f"🔪 {executed} 가 처형되었습니다.")
 
-            result_msg = {
-                "type": MessageType.EXECUTION_RESULT.name,
-                "payload": {
-                    "message": f"🔪 {executed} 가 투표로 처형되었습니다.",
-                    "executed": executed
-                }
-            }
+            message = create_message(MessageType.EXECUTION_RESULT, self.name, "All-Alive", target=executed)
 
-            await self.broadcast_to_roles(json.dumps(result_msg))
+            await self.broadcast_to_roles(message)
 
         else:
             print("⚖️ 처형 없음 (동률 또는 투표 실패).")
@@ -197,14 +191,7 @@ class ManagerAgent(BaseAgent):
     async def request_votes(self) -> Dict[str, str]:
         """모든 살아있는 에이전트에게 투표 요청하고 응답 수집."""
        
-        message_dict = {
-            "type": MessageType.VOTE_REQUEST.name,
-            "payload": {
-                "message": "🗳️ 누구를 처형할지 투표해주세요. 살아있는 에이전트 이름 중에서 선택하세요."
-            }
-        }
-
-        message = json.dumps(message_dict)
+        message = create_message(MessageType.VOTE_REQUEST, self.name, "All-Alive")
 
               
         # 응답 수집
@@ -256,13 +243,7 @@ class ManagerAgent(BaseAgent):
             # 4-1. 마피아의 밤 공격
             if status.role == Role.MAFIA:
                 try:
-                    message = json.dumps({
-                        "type": MessageType.NIGHT_ACTION_REQUEST.name,
-                        "payload": {
-                            "role": "MAFIA",
-                            "message": "밤입니다. 제거할 대상을 선택하세요."
-                        }
-                    })
+                    message = create_message(MessageType.NIGHT_ACTION_REQUEST, self.name, name, role=status.role)
                     response = await self.executor.send_to_other(name, message)
                     if response:
                         mafia_targets.append(response[0])
@@ -273,13 +254,7 @@ class ManagerAgent(BaseAgent):
             # 4-2. 경찰의 조사
             elif status.role == Role.DETECTIVE:
                 try:
-                    message = json.dumps({
-                        "type": MessageType.NIGHT_ACTION_REQUEST.name,
-                        "payload": {
-                            "role": "DETECTIVE",
-                            "message": "밤입니다. 조사할 대상을 선택하세요."
-                        }
-                    })
+                    message = create_message(MessageType.NIGHT_ACTION_REQUEST, self.name, name, role=status.role)
                     response = await self.executor.send_to_other(name, message)
                     if response:
                         target = response[0]
@@ -300,29 +275,16 @@ class ManagerAgent(BaseAgent):
                 print(f"\n💀 밤 동안 {killed} 가 제거되었습니다.")
 
                 # 전체에게 제거 사실을 알림
-                result_message = {
-                    "type": MessageType.KILLED_RESULT.name,
-                    "payload": {
-                        "message": f"💀 밤 사이 {killed} 가 사망했습니다.",
-                        "killed": killed
-                    }
-                }
-                await self.broadcast_to_roles(json.dumps(result_message))
+                message = create_message(MessageType.KILLED_RESULT, self.name, "All-Alive", target=killed)
+                await self.broadcast_to_roles(message)
         else:
             print("😴 마피아가 아무도 제거하지 않았습니다.")
 
         # 4-4. 경찰에게 조사 결과 전달
         for detective, (target, is_mafia) in detective_results.items():
             try:
-                result_message = {
-                    "type": MessageType.NIGHT_ACTION_RESULT.name,
-                    "payload": {
-                        "message": f"🔍 당신이 조사한 {target} 은(는) {'마피아' if is_mafia else '시민'}입니다.",
-                        "target": target,
-                        "is_mafia": is_mafia
-                    }
-                }
-                await self.executor.send_to_other(detective, json.dumps(result_message))
+                message = create_message(MessageType.NIGHT_ACTION_RESULT, self.name, detective, target=target, is_mafia=is_mafia)
+                await self.executor.send_to_other(detective, message)
             except Exception as e:
                 print(f"❌ 경찰 결과 전송 실패: {e}")
 
@@ -346,14 +308,8 @@ class ManagerAgent(BaseAgent):
 
     # 6. 게임 결과
     async def announce_winner(self, winner: str):
-        msg = json.dumps({
-            "type": MessageType.GAME_RESULT.name,
-            "payload": {
-                "message": f"🏁 게임 종료! 승리 팀: {winner}",
-                "winner": winner
-            }
-        })
-        await self.broadcast_to_all(msg)
+        message = create_message(MessageType.GAME_RESULT, self.name, "All-Alive", winner=winner)
+        await self.broadcast_to_all(message)
         print(f"🏁 게임 종료! 승리 팀: {winner}")
            
 

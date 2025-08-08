@@ -6,3 +6,4 @@ httpx
 asyncio
 nest_asyncio
 pydantic
+google-generativeai

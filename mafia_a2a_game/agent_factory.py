@@ -26,7 +26,8 @@ def get_agent(agent_card: AgentCard):
     """Get the agent, given an agent card."""
     try:
         if agent_card.name == 'Manager Agent':
-            return ManagerAgent()
+            return ManagerAgent(agent_card.name, agent_card.description)
+            
         else :
             return MemberAgent(agent_card.name, agent_card.description) 
             

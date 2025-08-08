@@ -41,7 +41,7 @@ class GenericAgentExecutor(AgentExecutor):
         # 1. get user input message 
         text = context.get_user_input()
         task = context.current_task
-        print("Recv Request :", text)
+        #print("Recv Request :", text)
 
         # 2. 
         response_text = await self.agent.handle_message( text )
@@ -73,14 +73,14 @@ class GenericAgentExecutor(AgentExecutor):
 
            
         response = await self.client_agent.send_message(agent_name, None, None, user_text)
-        print("Response:")
-        if response : 
-            for i, item in enumerate(response):
-                print(f"  {item}")
-                
-        else : 
+        
+        #if response :
+        #    print("Response:") 
+        #    for i, item in enumerate(response):
+        #        print(f"  {item}")
+      
+        if not response : 
             print("⚠️ 응답이 없습니다 (response is None).")
-            print()
 
         return response
 
