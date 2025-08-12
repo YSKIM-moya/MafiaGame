@@ -139,7 +139,7 @@ class LangGraphManagerAgent(BaseAgent):
         for agent_name, status in state["agent_info"].items():
             try:
                 msg = create_message(MessageType.ROLE_ASSIGNMENT, self.name, agent_name, role=status.role)
-                asyncio.create_task(await self.executor.send_to_other(agent_name, msg))
+                asyncio.create_task( self.executor.send_to_other(agent_name, msg))
                 print(f"역할 전송 완료: {agent_name} → {status.role.name}")
             except Exception as e:
                 print(f"역할 전송 실패: {agent_name} → {status.role.name} ({e})")

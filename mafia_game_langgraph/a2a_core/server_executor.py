@@ -72,7 +72,7 @@ class GenericAgentExecutor(AgentExecutor):
                 print(f"✅ 에이전트 '{agent_name}' 연결 완료.")
 
            
-        response = await self.client_agent.send_message(agent_name, None, None, user_text)
+        response = await self.client_agent.send_message(agent_name, user_text, task_id=None, context_id=None)
         
         #if response :
         #    print("Response:") 

@@ -8,7 +8,7 @@ import nest_asyncio  # 중첩 루프 허용
 
 from typing import Callable
 from agent_factory import build_server_from_config
-from manager_agent import ManagerAgent
+from langgraph_manager_agent import LangGraphManagerAgent
 from member_agent import MemberAgent
 
 server = None  # 전역 서버 객체
@@ -42,7 +42,7 @@ async def main(config_path: str):
 
     # 3. 모든 에이전트에 shutdown 콜백 등록
     agent = handler.agent_executor.agent
-    if isinstance(agent, (ManagerAgent, MemberAgent)):
+    if isinstance(agent, (LangGraphManagerAgent, MemberAgent)):
         agent.set_server_shutdown_callback(shutdown_server)
 
     # 4. ManagerAgent라면 게임 루프 시작 

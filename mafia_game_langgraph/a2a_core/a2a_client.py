@@ -28,7 +28,7 @@ from a2a.types import (
 from collections.abc import Callable
 from pydantic import BaseModel, HttpUrl
 
-PUBLIC_AGENT_CARD_PATH = '/.well-known/agent.json'
+PUBLIC_AGENT_CARD_PATH = '/.well-known/agent_card.json'
 EXTENDED_AGENT_CARD_PATH = '/agent/authenticatedExtendedCard'
 
 TaskCallbackArg = Task | TaskStatusUpdateEvent | TaskArtifactUpdateEvent
@@ -49,7 +49,7 @@ class RemoteAgentConnections:
         self.agent_client = A2AClient(client, agent_card)
         self.card = agent_card
         self.pending_tasks = set()
-        print('A2AClient initialized : ', agent_card)
+        #print('A2AClient initialized : ', agent_card)
 
     def get_agent(self) -> AgentCard:
         return self.card
@@ -182,7 +182,8 @@ class A2AClientAgent:
 
 
 
-    async def send_message(self, agent_name:str, task_id:str, context_id:str, user_text: str) -> Any:
+    async def send_message(self, agent_name:str, user_text: str, 
+                            task_id:Optional[str] = None, context_id:Optional[str] = None ) -> Any:
         """Sends a task either streaming (if supported) or non-streaming.
 
         This will send a message to the remote agent named agent_name.
@@ -206,12 +207,9 @@ class A2AClientAgent:
 
 
         # setting request message
-        if not task_id:
-            task_id = str(uuid.uuid4())
-        if not context_id:
-            context_id = str(uuid.uuid4())
        
-        message_id = str(uuid.uuid4())
+       
+        #message_id = str(uuid.uuid4())
 
         #print(f"Send Request : ", TextPart(text=user_text))
         request: MessageSendParams = MessageSendParams(
@@ -219,8 +217,8 @@ class A2AClientAgent:
             message=Message(
                 role='user',
                 parts=[TextPart(text=user_text)],
-                #message_id=str(uuid.uuid4()),
-                **{"messageId": message_id},   # alias 이름으로 명시적 전달
+                message_id=str(uuid.uuid4()),
+                #**{"messageId": message_id},   # alias 이름으로 명시적 전달
                 context_id=context_id,
                 task_id=task_id
             ),
@@ -234,7 +232,7 @@ class A2AClientAgent:
         print("Recv Response :", response.model_dump(mode='json', exclude_none=True))
 
         if isinstance(response, Message):
-            message_id = response.messageId
+            message_id = response.message_id
             #print(f"Message ID: {message_id}")
             return await self.convert_parts(response.parts)
         elif isinstance(response, Task):
